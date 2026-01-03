@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- xml文件通过绑定maper接口-->
+
+<mapper namespace="com.yjx.note.dao.NoteDao">
+
+    <insert id="addOrUpdate" parameterType="com.yjx.note.po.Note">
+        <choose>
+            <!-- 添加操作 -->
+            <when test="noteId == null">
+                insert into tb_note (typeId, title, content, pubTime, lon, lat)
+                values (#{typeId}, #{title}, #{content}, now(), #{lon}, #{lat})
+            </when>
+            <!--             修改操作-->
+            <otherwise>
+                update tb_note set typeId = #{typeId}, title = #{title}, content = #{content}
+                where noteId = #{noteId}
+            </otherwise>
+        </choose>
+    </insert>
+
+    <delete id="deleteNoteById">
+        delete from tb_note where noteId=#{noteId}
+    </delete>
+
+    <!-- 查询当前登录用户的云记数量 -->
+    <select id="findNoteCount" resultType="long">
+        SELECT count(1) FROM tb_note n
+        INNER JOIN tb_note_type t on n.typeId = t.typeId
+        WHERE userId = #{userId}
+        <if test="title != null and title != ''">
+            and title like concat('%', #{title}, '%')
+        </if>
+        <if test="date != null and date != ''">
+            and date_format(pubTime,'%Y年%m月') = #{date}
+        </if>
+        <if test="typeId != null and typeId != ''">
+            and n.typeId = #{typeId}
+        </if>
+    </select>
+
+
+    <select id="findNoteListByPage" resultType="com.yjx.note.po.Note">
+        SELECT noteId, title, pubTime
+        FROM tb_note n
+        INNER JOIN tb_note_type t on n.typeId = t.typeId
+        WHERE userId = #{userId}
+        <if test="title != null and title != ''">
+            and title like concat('%', #{title}, '%')
+        </if>
+        <if test="date != null and date != ''">
+            and date_format(pubTime,'%Y年%m月') = #{date}
+<!--            AND DATE_FORMAT(pubTime, '%Y-%m') = #{date}-->
+        </if>
+        <if test="typeId != null and typeId != ''">
+            and n.typeId = #{typeId}
+        </if>
+        order by pubTime desc
+        limit #{index}, #{pageSize}
+    </select>
+
+    <select id="findNoteCountByDate" resultType="com.yjx.note.vo.NoteVo">
+        SELECT
+        count(1) noteCount,
+        DATE_FORMAT(pubTime,'%Y年%m月') groupName
+        FROM tb_note n
+        INNER JOIN tb_note_type t ON n.typeId = t.typeId
+        WHERE userId = #{userId}
+        GROUP BY DATE_FORMAT(pubTime,'%Y年%m月')
+        ORDER BY DATE_FORMAT(pubTime,'%Y年%m月') DESC
+    </select>
+
+<!--    <select id="findNoteCountByDate" resultType="com.yjx.note.vo.NoteVo">-->
+<!--        SELECT-->
+<!--        COUNT(1) AS noteCount,-->
+<!--        DATE_FORMAT(pubTime, '%Y-%m') AS groupName-->
+<!--        FROM tb_note n-->
+<!--        INNER JOIN tb_note_type t ON n.typeId = t.typeId-->
+<!--        WHERE userId = #{userId}-->
+<!--        GROUP BY DATE_FORMAT(pubTime, '%Y-%m')-->
+<!--        ORDER BY DATE_FORMAT(pubTime, '%Y-%m') DESC-->
+<!--    </select>-->
+
+    <select id="findNoteCountByType" resultType="com.yjx.note.vo.NoteVo">
+        SELECT count(noteId) noteCount, t.typeId, typeName groupName
+        FROM tb_note n
+        RIGHT JOIN tb_note_type t ON n.typeId = t.typeId
+        WHERE userId = #{userId}
+        GROUP BY t.typeId
+        ORDER BY COUNT(noteId) DESC
+    </select>
+
+    <select id="findNoteById" resultType="com.yjx.note.po.Note">
+        select
+        noteId,
+        title,
+        content,
+        pubTime,
+        typeName,
+        n.typeId
+        from tb_note n
+        inner join tb_note_type t on n.typeId = t.typeId
+        where noteId = #{noteId}
+    </select>
+
+    <select id="queryNoteList" resultType="com.yjx.note.po.Note">
+        select lon, lat
+        from tb_note n
+        inner join tb_note_type t on n.typeId = t.typeId
+        where userId = #{userId}
+    </select>
+</mapper>

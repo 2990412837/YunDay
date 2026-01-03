@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yjx.note.dao.NoteTypeDao">
+    <select id="queryNoteTypeList" resultType="NoteType">
+        select typeId, typeName, userId from tb_note_type where userId = #{userId}
+    </select>
+    <delete id="deleteTypeById">
+        delete from tb_note_type where typeId = #{typeId}
+    </delete>
+    <select id="findNoteCountByTypeId" resultType="java.lang.Long">
+        select count(1) from tb_note where typeId = #{typeId}
+    </select>
+
+    <select id="checkTypeName" resultType="com.yjx.note.po.NoteType">
+        select * from tb_note_type where userId = #{userId} and typeName = #{typeName}
+    </select>
+
+    <insert id="insertNoteType" useGeneratedKeys="true" keyProperty="typeId">
+        INSERT INTO tb_note_type
+        (typeName, userId)
+        VALUES
+        (#{typeName}, #{userId})
+    </insert>
+    <update id="updateType">
+        update tb_note_type set typeName = #{typeName} where typeId = #{typeId}
+    </update>
+</mapper>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yjx.note.dao.UserDao">
+    <update id="updateUser">
+        update tb_user set nick = #{nick}, mood = #{mood}, head = #{head} where userId
+        = #{userId}
+    </update>
+    <select id="queryUserByName" resultType="com.yjx.note.po.User">
+        select * from tb_user where uname = #{uname}
+    </select>
+    <select id="queryUserByNickAndUserId" resultType="com.yjx.note.po.User">
+        select * from tb_user where nick=#{nick} and userId!=#{userId}
+    </select>
+</mapper>
